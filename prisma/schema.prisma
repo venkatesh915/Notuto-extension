@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(uuid())
+  name             String?
+  email            String    @unique
+  password         String
+  role             String    @default("STUDENT")
+  isSubscribed     Boolean   @default(false)
+  subscriptionDate DateTime?
+  notes            Note[]
+  liveClasses      LiveClass[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  content   String
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model LiveClass {
+  id          String   @id @default(uuid())
+  meetingID   String   @unique
+  name        String
+  status      String   @default("ACTIVE")
+  facultyId   String
+  faculty     User     @relation(fields: [facultyId], references: [id])
+  moderatorPw String
+  attendeePw  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
